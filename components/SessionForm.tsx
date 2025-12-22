@@ -16,6 +16,7 @@ export function SessionForm({ editingSession, onCancelEdit, onSuccess }: Session
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
+        date: new Date().toLocaleDateString('en-CA'), // Formats as YYYY-MM-DD in local time
         location: "",
         gameType: "",
         buyIn: "",
@@ -28,6 +29,7 @@ export function SessionForm({ editingSession, onCancelEdit, onSuccess }: Session
     useEffect(() => {
         if (editingSession) {
             setFormData({
+                date: editingSession.date,
                 location: editingSession.location,
                 gameType: editingSession.gameType,
                 buyIn: editingSession.buyIn.toString(),
@@ -39,6 +41,7 @@ export function SessionForm({ editingSession, onCancelEdit, onSuccess }: Session
         } else {
             // Reset if no editing session (e.g. cancelled)
             setFormData({
+                date: new Date().toLocaleDateString('en-CA'),
                 location: "",
                 gameType: "",
                 buyIn: "",
@@ -61,6 +64,7 @@ export function SessionForm({ editingSession, onCancelEdit, onSuccess }: Session
             const stakeSold = parseFloat(formData.stakeSold) || 0;
 
             const sessionData = {
+                date: formData.date,
                 location: formData.location || "Online",
                 gameType: formData.gameType || "NLH",
                 buyIn,
@@ -73,15 +77,13 @@ export function SessionForm({ editingSession, onCancelEdit, onSuccess }: Session
             if (editingSession) {
                 await updateSession(editingSession.id, sessionData);
             } else {
-                await addSession({
-                    ...sessionData,
-                    date: new Date().toISOString().split('T')[0],
-                });
+                await addSession(sessionData);
             }
 
             // Reset form if just adding, or notify parent if editing
             if (!editingSession) {
                 setFormData({
+                    date: new Date().toLocaleDateString('en-CA'),
                     location: "",
                     gameType: "",
                     buyIn: "",
@@ -122,6 +124,17 @@ export function SessionForm({ editingSession, onCancelEdit, onSuccess }: Session
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-500">Date</label>
+                        <input
+                            type="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            required
+                        />
+                    </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-500">Location</label>
                         <input
